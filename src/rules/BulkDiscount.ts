@@ -1,5 +1,7 @@
 import { PricingRule } from "./PricingRule";
 import { CATALOGUE } from "../catalogue";
+import { UnknownSkuError, InvalidRuleConfigError } from "../errors";
+import { assert } from "../assert";
 
 /**
  * Bulk discount rule: when more than `threshold` units of a SKU are purchased,
@@ -15,7 +17,12 @@ export class BulkDiscount implements PricingRule {
     private readonly sku: string,
     private readonly threshold: number,
     private readonly discountedPrice: number
-  ) {}
+  ) {
+    assert(!!CATALOGUE[sku], new UnknownSkuError(sku));
+    assert(threshold > 0, new InvalidRuleConfigError(`threshold must be greater than 0, got ${threshold}`));
+    assert(discountedPrice >= 0, new InvalidRuleConfigError(`discountedPrice cannot be negative, got ${discountedPrice}`));
+    assert(discountedPrice < CATALOGUE[sku].price, new InvalidRuleConfigError(`discountedPrice (${discountedPrice}) must be less than base price (${CATALOGUE[sku].price})`));
+  }
 
   apply(items: string[]): number {
     const count = items.filter((item) => item === this.sku).length;

@@ -1,5 +1,7 @@
 import { PricingRule } from "./rules";
 import { CATALOGUE } from "./catalogue";
+import { UnknownSkuError } from "./errors";
+import { assert } from "./assert";
 
 /**
  * Checkout allows items to be scanned one at a time and calculates
@@ -11,6 +13,8 @@ export class Checkout {
   constructor(private readonly pricingRules: PricingRule[]) {}
 
   scan(item: string): void {
+    assert(!!CATALOGUE[item], new UnknownSkuError(item));
+
     this.items.push(item);
   }
 

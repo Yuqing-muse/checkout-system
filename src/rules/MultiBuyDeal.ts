@@ -1,5 +1,7 @@
 import { PricingRule } from "./PricingRule";
 import { CATALOGUE } from "../catalogue";
+import { UnknownSkuError, InvalidRuleConfigError } from "../errors";
+import { assert } from "../assert";
 
 /**
  * Multi-buy deal rule
@@ -16,7 +18,12 @@ export class MultiBuyDeal implements PricingRule {
     private readonly sku: string,
     private readonly buyCount: number,
     private readonly payCount: number
-  ) {}
+  ) {
+    assert(!!CATALOGUE[sku], new UnknownSkuError(sku));
+    assert(buyCount > 1, new InvalidRuleConfigError(`buyCount must be greater than 1, got ${buyCount}`));
+    assert(payCount > 0, new InvalidRuleConfigError(`payCount must be greater than 0, got ${payCount}`));
+    assert(payCount < buyCount, new InvalidRuleConfigError(`payCount (${payCount}) must be less than buyCount (${buyCount})`));
+  }
 
   apply(items: string[]): number {
     const totalCount = items.filter((item) => item === this.sku).length;
