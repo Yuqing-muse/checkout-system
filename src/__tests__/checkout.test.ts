@@ -1,5 +1,6 @@
 import { Checkout } from "../checkout";
 import { MultiBuyDeal, BulkDiscount, PricingRule } from "../rules";
+import { UnknownSkuError } from "../errors";
 
 const pricingRules: PricingRule[] = [
   new MultiBuyDeal("atv", 3, 2),
@@ -14,6 +15,12 @@ function checkout(...items: string[]): number {
 }
 
 describe("Checkout", () => {
+  it("should throw UnknownSkuError on unknown item", () => {
+    const co = new Checkout(pricingRules);
+
+    expect(() => co.scan("unknown")).toThrow(UnknownSkuError);
+  });
+
   it("empty cart totals zero", () => {
     expect(new Checkout(pricingRules).total()).toBe(0);
   });
@@ -35,7 +42,7 @@ describe("Checkout", () => {
   });
 
   it("should buy 3 get 2 deal with other items", () => {
-    expect(checkout("atv", "atv", "atv", "vga", "vga")).toBe(249.0);
+    expect(checkout("atv", "atv", "atv", "vga", "vga")).toBe(279.0);
   });
 
   it("should apply multiple rules in one cart", () => {

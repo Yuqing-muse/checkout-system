@@ -1,4 +1,23 @@
 import { MultiBuyDeal, BulkDiscount } from "../rules";
+import { UnknownSkuError, InvalidRuleConfigError } from "../errors";
+
+describe("MultiBuyDeal constructor guards", () => {
+  it("should throw UnknownSkuError on unknown item", () => {
+    expect(() => new MultiBuyDeal("unknown", 3, 2)).toThrow(UnknownSkuError);
+  });
+
+  it("should throw InvalidRuleConfigError when buyCount is 1", () => {
+    expect(() => new MultiBuyDeal("atv", 1, 1)).toThrow(InvalidRuleConfigError);
+  });
+
+  it("should throw InvalidRuleConfigError when payCount >= buyCount", () => {
+    expect(() => new MultiBuyDeal("atv", 3, 3)).toThrow(InvalidRuleConfigError);
+  });
+
+  it("should throw InvalidRuleConfigError when payCount is 0", () => {
+    expect(() => new MultiBuyDeal("atv", 3, 0)).toThrow(InvalidRuleConfigError);
+  });
+});
 
 describe("MultiBuyDeal", () => {
   const rule = new MultiBuyDeal("atv", 3, 2);
@@ -21,6 +40,24 @@ describe("MultiBuyDeal", () => {
 
   it("should ignore other items", () => {
     expect(rule.apply(["vga", "vga", "vga"])).toBe(0);
+  });
+});
+
+describe("BulkDiscount constructor guards", () => {
+  it("should throw UnknownSkuError on unknown item", () => {
+    expect(() => new BulkDiscount("unknown", 4, 49999)).toThrow(UnknownSkuError);
+  });
+
+  it("should throw InvalidRuleConfigError when threshold is 0", () => {
+    expect(() => new BulkDiscount("ipd", 0, 49999)).toThrow(InvalidRuleConfigError);
+  });
+
+  it("should throw InvalidRuleConfigError when discountedPrice is negative", () => {
+    expect(() => new BulkDiscount("ipd", 4, -1)).toThrow(InvalidRuleConfigError);
+  });
+
+  it("should throw InvalidRuleConfigError when discountedPrice >= base price", () => {
+    expect(() => new BulkDiscount("ipd", 4, 54999)).toThrow(InvalidRuleConfigError);
   });
 });
 
