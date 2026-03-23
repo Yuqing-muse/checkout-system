@@ -1,20 +1,23 @@
 import { PricingRule } from "./rules";
+import { Product } from "./models/product";
 import { CATALOGUE } from "./catalogue";
 import { UnknownSkuError } from "./errors";
 import { assert } from "./assert";
 
 /**
  * Checkout allows items to be scanned one at a time and calculates
- * the total price after applying all discount rules.
+ * the total price after applying all pricing rules.
  */
 export class Checkout {
   private items: string[] = [];
 
-  constructor(private readonly pricingRules: PricingRule[]) {}
+  constructor(
+    private readonly pricingRules: PricingRule[],
+    private readonly catalogue: Record<string, Product> = CATALOGUE
+  ) {}
 
   scan(item: string): void {
-    assert(!!CATALOGUE[item], new UnknownSkuError(item));
-
+    assert(!!this.catalogue[item], new UnknownSkuError(item));
     this.items.push(item);
   }
 
@@ -32,7 +35,7 @@ export class Checkout {
 
     // Apply each discounted rule
     this.pricingRules.forEach((rule) => {
-      adjustments += rule.apply(this.items);
+      adjustments += rule.apply(this.items, this.catalogue);
     });
 
     return (baseTotal + adjustments) / 100;

@@ -14,8 +14,9 @@ A TypeScript implementation of a flexible checkout system for Zeller's computer 
 
 - Scan items in any order
 - Inject pricing rules at construction — no hardcoding
+- Inject a custom product catalogue at construction — defaults to the built-in catalogue
 - Two built-in rule types: multi-buy deals and bulk discounts
-- Open to new rule addition in the future, simply add new files under `src/rules/`
+- Open to new rule types in the future — implement `PricingRule` and pass it in
 - Prices stored as integer cents to avoid floating-point errors
 
 ## Product Catalogue
@@ -51,26 +52,6 @@ src/
   catalogue.ts               — Product catalogue (4 SKUs)
   checkout.ts                — Checkout class
   index.ts                   — Public entry point
-```
-
-
-## Usage
-
-```typescript
-import { Checkout, MultiBuyDeal, BulkDiscount } from "./src";
-
-const pricingRules = [
-  new MultiBuyDeal("atv", 3, 2),        // 3-for-2 on Apple TV
-  new BulkDiscount("ipd", 4, 49999),    // >4 iPads → $499.99 each (price in cents)
-];
-
-const co = new Checkout(pricingRules);
-co.scan("atv");
-co.scan("atv");
-co.scan("atv");
-co.scan("ipd");
-
-console.log(co.total()); // 769.49
 ```
 
 ## Edge Cases
